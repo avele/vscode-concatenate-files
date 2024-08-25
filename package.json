@@ -1,7 +1,8 @@
 {
   "name": "concatenate-files",
   "displayName": "Concatenate Files in Folder",
-  "description": "xtension to concatenate all files in a folder into a single file with relative paths as comments.",
+  "description": "Extension to concatenate all files in a folder into a single file with relative paths as comments.",
+  "repository": "https://github.com/avele/vscode-concatenate-files",
   "version": "0.0.1",
   "publisher": "avele",
   "engines": {
