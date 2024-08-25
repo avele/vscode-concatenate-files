@@ -1,0 +1,41 @@
+{
+  "name": "concatenate-files",
+  "displayName": "Concatenate Files in Folder",
+  "description": "xtension to concatenate all files in a folder into a single file with relative paths as comments.",
+  "version": "0.0.1",
+  "publisher": "avele",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.concatenateFiles",
+        "title": "Concatenate Files in Folder"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "extension.concatenateFiles",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.5.4"
+  }
+}
