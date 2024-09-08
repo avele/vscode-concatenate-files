@@ -3,7 +3,7 @@
   "displayName": "Concatenate Files in Folder",
   "description": "Extension to concatenate all files in a folder into a single file with relative paths as comments.",
   "repository": "https://github.com/avele/vscode-concatenate-files",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "avele",
   "engines": {
     "vscode": "^1.80.0"
@@ -27,16 +27,99 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "Concatenate Files",
+      "properties": {
+        "concatenateFiles.ignorePatterns": {
+          "type": "array",
+          "default": [
+            "**/.git/**",
+            "**/node_modules/**",
+            "**/.vscode/**",
+            "**/out/**",
+            "**/dist/**",
+            "**/*.log",
+            "**/.DS_Store",
+            "**/Thumbs.db",
+            "**/.gitignore",
+            "**/.gitattributes",
+            "**/.gitmodules",
+            "**/.svn/**",
+            "**/.hg/**",
+            "**/.idea/**",
+            "**/*.vsix",
+            "**/*.map",
+            "**/*.jpg",
+            "**/*.jpeg",
+            "**/*.png",
+            "**/*.gif",
+            "**/*.bmp",
+            "**/*.ico",
+            "**/*.svg",
+            "**/*.webp",
+            "**/*.tiff",
+            "**/*.psd",
+            "**/*.raw",
+            "**/*.mp3",
+            "**/*.mp4",
+            "**/*.avi",
+            "**/*.mov",
+            "**/*.wmv",
+            "**/*.flv",
+            "**/*.wav",
+            "**/*.ogg",
+            "**/*.pdf",
+            "**/*.doc",
+            "**/*.docx",
+            "**/*.xls",
+            "**/*.xlsx",
+            "**/*.ppt",
+            "**/*.pptx",
+            "**/*.zip",
+            "**/*.rar",
+            "**/*.7z",
+            "**/*.tar",
+            "**/*.gz",
+            "**/*.exe",
+            "**/*.dll",
+            "**/*.so",
+            "**/*.dylib",
+            "**/*.bin",
+            "**/*.dat",
+            "**/*.db",
+            "**/*.sqlite"
+          ],
+          "description": "Glob patterns for files and folders to ignore when concatenating"
+        }
+      }
     }
   },
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "build": "npm run compile"
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "vscode:prepublish": "npm run compile",
+    "build": "npm run compile && vsce package",
+    "publish": "vsce publish",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "deploy:patch": "npm run version:patch && npm run build && npm run publish",
+    "deploy:minor": "npm run version:minor && npm run build && npm run publish",
+    "deploy:major": "npm run version:major && npm run build && npm run publish"
+  },
+  "dependencies": {
+    "glob": "^11.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.5.0",
-    "@types/vscode": "^1.80.0",
-    "typescript": "^5.5.4"
+    "@types/node": "^22.5.4",
+    "@types/vscode": "^1.93.0",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "eslint": "^9.10.0",
+    "typescript": "^5.5.4",
+    "vsce": "^2.15.0"
   }
 }
