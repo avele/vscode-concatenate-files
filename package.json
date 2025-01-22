@@ -12,21 +12,44 @@
     "Other"
   ],
   "main": "./out/extension.js",
-  "activationEvents": [
-    "onCommand:extension.concatenateFiles"
-  ],
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "vscode:prepublish": "npm run compile",
+    "build": "npm run compile && vsce package",
+    "publish": "vsce publish",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "deploy:patch": "npm run version:patch && npm run build && npm run publish",
+    "deploy:minor": "npm run version:minor && npm run build && npm run publish",
+    "deploy:major": "npm run version:major && npm run build && npm run publish"
+  },
+  "dependencies": {
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/vscode": "^1.93.0",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "eslint": "^9.10.0",
+    "typescript": "^5.5.4",
+    "vsce": "^2.15.0"
+  },
   "contributes": {
     "commands": [
       {
         "command": "extension.concatenateFiles",
-        "title": "Concatenate Files in Folder"
+        "title": "Concatenate Files"
       }
     ],
     "menus": {
       "explorer/context": [
         {
           "command": "extension.concatenateFiles",
-          "when": "explorerResourceIsFolder",
           "group": "navigation"
         }
       ]
@@ -97,33 +120,5 @@
         }
       }
     }
-  },
-  "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js",
-    "vscode:prepublish": "npm run compile",
-    "build": "npm run compile && vsce package",
-    "publish": "vsce publish",
-    "version:patch": "npm version patch",
-    "version:minor": "npm version minor",
-    "version:major": "npm version major",
-    "deploy:patch": "npm run version:patch && npm run build && npm run publish",
-    "deploy:minor": "npm run version:minor && npm run build && npm run publish",
-    "deploy:major": "npm run version:major && npm run build && npm run publish"
-  },
-  "dependencies": {
-    "glob": "^11.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.5.4",
-    "@types/vscode": "^1.93.0",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
-    "eslint": "^9.10.0",
-    "typescript": "^5.5.4",
-    "vsce": "^2.15.0"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  }
 }

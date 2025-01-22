@@ -1,74 +1,82 @@
 import {ExtensionContext, commands, window, workspace, Uri} from 'vscode'
-import {readFile} from 'fs/promises'
-import {relative, join} from 'path'
+import {readFile, stat} from 'fs/promises'
+import {relative} from 'path'
 import {glob} from 'glob'
 
 export function activate(context: ExtensionContext) {
-  console.log(
-    'Congratulations, your extension "concatenate-files" is now active!'
-  )
-  window.showInformationMessage('Concatenate Files extension is now active')
-
   let disposable = commands.registerCommand(
     'extension.concatenateFiles',
-    async (uri: Uri) => {
-      window.showInformationMessage('concatenateFiles command triggered')
+    async (...args) => {
+      // Handle both single and multiple selections through command palette or context menu
+      let uris: Uri[] = []
 
-      if (!uri || !uri.fsPath) {
-        window.showInformationMessage('No valid URI provided')
-        window.showErrorMessage('Please select a valid folder.')
+      if (args.length > 0) {
+        if (Array.isArray(args[1])) {
+          // Context menu with multiple selection
+          uris = args[1]
+        } else {
+          // Single selection
+          uris = [args[0]]
+        }
+      }
+
+      if (!uris.length) {
+        window.showErrorMessage('Please select files or folders to process.')
         return
       }
 
-      window.showInformationMessage(`Selected folder: ${uri.fsPath}`)
-
-      const folderPath = uri.fsPath
-      const workspaceFolder = workspace.getWorkspaceFolder(uri)
+      const workspaceFolder = workspace.getWorkspaceFolder(uris[0])
       if (!workspaceFolder) {
-        window.showInformationMessage('No workspace folder found')
-        window.showErrorMessage('Please select a folder within a workspace.')
+        window.showErrorMessage(
+          'Please select files/folders within a workspace.'
+        )
         return
       }
 
       try {
-        window.showInformationMessage('Getting ignore patterns from settings')
         const config = workspace.getConfiguration('concatenateFiles')
-        console.log(`config:`, config)
         const ignorePatterns: string[] = config.get('ignorePatterns') || []
-        console.log(`Ignore patterns: ${ignorePatterns.join(', ')}`)
 
-        console.log('Getting all files in folder')
-        const files = await getAllFilesInFolder(folderPath, ignorePatterns)
-        console.log(`Found ${files.length} files`)
+        let allFiles: string[] = []
 
-        console.log('Concatenating files')
-        let concatenatedContent = ''
+        // Process each selected item
+        for (const uri of uris) {
+          const stats = await stat(uri.fsPath)
 
-        for (const file of files) {
-          try {
-            const relativePath = relative(workspaceFolder.uri.fsPath, file)
-            console.log(`Processing file: ${relativePath}`)
-
-            const fileContent = await readFile(file, 'utf-8')
-
-            concatenatedContent += `/// ${relativePath}\n\n${fileContent}\n\n`
-          } catch (error: any) {
-            console.error(`Error in processing file ${file}:`, error)
-            console.error(`An error occurred`, error)
+          if (stats.isDirectory()) {
+            // If it's a directory, get all files inside
+            const files = await getAllFilesInFolder(uri.fsPath, ignorePatterns)
+            allFiles.push(...files)
+          } else {
+            // If it's a file, add it directly
+            allFiles.push(uri.fsPath)
           }
         }
 
-        console.log('Opening new document with concatenated content')
+        // Remove duplicates
+        allFiles = [...new Set(allFiles)]
+
+        let concatenatedContent = ''
+
+        for (const file of allFiles) {
+          try {
+            const relativePath = relative(workspaceFolder.uri.fsPath, file)
+            const fileContent = await readFile(file, 'utf-8')
+            concatenatedContent += `/// ${relativePath}\n\n${fileContent}\n\n`
+          } catch (error: any) {
+            console.error(`Error processing file ${file}:`, error)
+          }
+        }
+
         const document = await workspace.openTextDocument({
           content: concatenatedContent,
         })
-        window.showTextDocument(document)
+        await window.showTextDocument(document)
 
         window.showInformationMessage(
-          `Files concatenated successfully and opened in a new tab!`
+          `${allFiles.length} files concatenated successfully!`
         )
       } catch (error: any) {
-        window.showInformationMessage('Error in concatenateFiles:', error)
         window.showErrorMessage(`An error occurred: ${error.message}`)
       }
     }
@@ -81,9 +89,6 @@ async function getAllFilesInFolder(
   folderPath: string,
   ignorePatterns: string[]
 ): Promise<string[]> {
-  window.showInformationMessage(`Getting all files in folder: ${folderPath}`)
-  window.showInformationMessage(`Ignore patterns: ${ignorePatterns.join(', ')}`)
-
   const options = {
     cwd: folderPath,
     ignore: ignorePatterns,
@@ -92,17 +97,11 @@ async function getAllFilesInFolder(
   }
 
   try {
-    const files = await glob('**/*', options)
-    window.showInformationMessage(`Found ${files.length} files`)
-    return files
+    return await glob('**/*', options)
   } catch (error) {
-    window.showInformationMessage(`Error in getAllFilesInFolder: ${error}`)
+    console.error(`Error in getAllFilesInFolder: ${error}`)
     throw error
   }
 }
 
-export function deactivate() {
-  window.showInformationMessage(
-    'Concatenate Files extension is now deactivated'
-  )
-}
+export function deactivate() {}
