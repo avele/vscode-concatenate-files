@@ -39,6 +39,9 @@
     "typescript": "^5.5.4",
     "vsce": "^2.15.0"
   },
+  "activationEvents": [
+    "onCommand:extension.concatenateFiles"
+  ],
   "contributes": {
     "commands": [
       {
